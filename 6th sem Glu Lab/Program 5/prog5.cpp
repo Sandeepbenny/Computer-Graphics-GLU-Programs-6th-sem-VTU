@@ -1,6 +1,5 @@
 #include<stdio.h>
 #include<GL/glut.h>
-#define outcode int
 
 double xmin=50,ymin=50,xmax=100,ymax=100;
 double xvmin=200,yvmin=200,xvmax=300,yvmax=300;
@@ -9,11 +8,23 @@ const int RIGHT=8;
 const int LEFT=2;
 const int TOP=4;
 const int BOTTOM=1;
-outcode ComputeOutCode(double x, double y);
+int ComputeOutCode(double x, double y)
+{
+    int code=0;
+    if(y > ymax)
+        code|=TOP;
+    else if(y < ymin)
+        code|=BOTTOM;
+    if(x > xmax)
+        code|=RIGHT;
+    else if(x < xmin)
+        code|=LEFT;
+    return code;
+}
 
 void CohenSutherland(double x0, double y0, double x1, double y1)
 {
-    outcode outcode0, outcode1, outcodeOut;
+  int outcode0, outcode1, outcodeOut;
     bool accept=false, done=false;
     outcode0=ComputeOutCode(x0,y0);
     outcode1=ComputeOutCode(x1,y1);
@@ -73,45 +84,36 @@ void CohenSutherland(double x0, double y0, double x1, double y1)
         double vy0=yvmin+(y0-ymin)*sy;
         double vx1=xvmin+(x1-xmin)*sx;
         double vy1=yvmin+(y1-ymin)*sy;
-        glColor3f(1.0,0.0,0.0);
+        glColor3f(1.0,1.0,1.0);
         glBegin(GL_LINE_LOOP);
             glVertex2f(xvmin, yvmin);
             glVertex2f(xvmax, yvmin);
             glVertex2f(xvmax, yvmax);
             glVertex2f(xvmin, yvmax);
         glEnd();
-        glColor3f(0.0,0.0,1.0);
+        glColor3f(1.0,1.0,1.0);
         glBegin(GL_LINES);
             glVertex2d(vx0,vy0);
             glVertex2d(vx1,vy1);
         glEnd();
     }
 }
-
-outcode ComputeOutCode(double x, double y)
-{
-    outcode code=0;
-    if(y > ymax)
-        code = TOP;
-    else if(y < ymin)
-        code = BOTTOM;
-    if(x > xmax)
-        code = RIGHT;
-    else if(x < xmin)
-        code = LEFT;
-    return code;
-}
-
 void display()
 {
+    double x0=60,y0=20,x1=80,y1=120;
     glClear(GL_COLOR_BUFFER_BIT);
-    glColor3f(1.0,0.0,0.0);
+    glColor3f(1.0,1.0,1.0);
     glBegin(GL_LINES);
         glVertex2d(x0,y0);
         glVertex2d(x1,y1);
     glEnd();
-    glColor3f(0.0,0.0,1.0);
+    glColor3f(1.0,1.0,1.0);
     glBegin(GL_LINE_LOOP);
+	glVertex2d(x0,y0);
+	glVertex2d(x1,y1);
+	glEnd();
+	glVertex3f(1.0,1.0,1.0);
+	glBegin(GL_LINE_LOOP);
         glVertex2f(xmin, ymin);
         glVertex2f(xmax, ymin);
         glVertex2f(xmax, ymax);
@@ -123,23 +125,22 @@ void display()
 
 void myinit()
 {
-    glClearColor(1.0,1.0,1.0,1.0);
+    glClearColor(0.0,0.0,0.0,1.0);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluOrtho2D(0.0,499.0,0.0,499.0);
+    gluOrtho2D(1.0,500.0,0.0,500.0);
+    glMatrixMode(GL_MODELVIEW);
 }
 
 int main(int argc, char** argv)
 {
-    printf("Enter the end points of the line: ");
-    scanf("%lf%lf%lf%lf", &x0,&y0,&x1,&y1);
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE|GLUT_RGB);
     glutInitWindowSize(500,500);
     glutInitWindowPosition(0,0);
     glutCreateWindow("Cohen-Sutherland Line Clipping");
-    glutDisplayFunc(display);
     myinit();
+    glutDisplayFunc(display);
     glutMainLoop();
 }
 
